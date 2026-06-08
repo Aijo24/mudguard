@@ -65,7 +65,11 @@ Keep infrastructure (servers, SSH, secrets, domains, deploy commands) **out of t
 
 ## Credits
 
-Built on **ralph** by Frank Bria — [frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code) (MIT). This skill packages the architecture-deepening + issue-filing methodology as a ralph-driven pipeline.
+- **ralph** by Frank Bria — [frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code) (MIT): the autonomous loop this skill drives.
+- **Matt Pocock's skills** — [mattpocock/skills](https://github.com/mattpocock/skills): the `improve-codebase-architecture` + `to-issues` skills whose methodology (deep vs shallow modules, the deletion test, vertical-slice issues) this pipeline automates via ralph.
+- **John Ousterhout**, *A Philosophy of Software Design* — the underlying ideas (deep modules, the deletion test) that methodology builds on.
+
+This repo is original packaging that orchestrates ralph through that methodology; it does not redistribute either project's code.
 
 ## License
 

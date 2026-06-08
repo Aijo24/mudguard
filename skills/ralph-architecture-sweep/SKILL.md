@@ -7,7 +7,7 @@ description: Drive the ralph autonomous loop to run an architecture-deepening sw
 
 Drive **ralph** ([frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code)) to sweep a codebase for **architecture-deepening opportunities** and file them as **vertical-slice issues** — over the **whole codebase or a user-chosen part**. Optionally chain ralph to implement + deploy the issues (project-specific — see [EXTENDING.md](EXTENDING.md)).
 
-Requires ralph installed in the repo (`ralph-claude-code/`, `.ralphrc`, `.ralph/`) and Claude Code. The deepening vocabulary (deep vs shallow modules, the deletion test, seams) and the vertical-slice issue format are the methodology this skill drives ralph through.
+Requires ralph installed in the repo (`ralph-claude-code/`, `.ralphrc`, `.ralph/`) and Claude Code. The deepening vocabulary (deep vs shallow modules, the deletion test, seams) and the vertical-slice issue format are the methodology this skill drives ralph through — from Matt Pocock's `improve-codebase-architecture` + `to-issues` skills ([mattpocock/skills](https://github.com/mattpocock/skills); see the repo README for full credits).
 
 ## Non-negotiable guardrails
 
