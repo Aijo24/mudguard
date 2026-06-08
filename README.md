@@ -11,7 +11,20 @@ It runs the "deepening" methodology — deep vs shallow modules, the **deletion 
 
 ## Install
 
-Copy the skill into your project's skills dir:
+**With `npx` (recommended)** — run from your project root:
+
+```bash
+npx github:Aijo24/ralph-architecture-sweep            # → ./.claude/skills/ralph-architecture-sweep
+npx github:Aijo24/ralph-architecture-sweep --global   # → ~/.claude/skills/ (all projects)
+```
+
+Once it's published to the npm registry, the short form also works:
+
+```bash
+npx ralph-architecture-sweep
+```
+
+**Manual** — copy the skill folder yourself:
 
 ```bash
 cp -R skills/ralph-architecture-sweep <your-repo>/.claude/skills/

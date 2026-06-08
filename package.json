@@ -1,0 +1,39 @@
+{
+  "name": "ralph-architecture-sweep",
+  "version": "0.1.0",
+  "description": "Installer for the ralph-architecture-sweep Claude Code skill — drive the ralph loop to sweep a codebase for architecture-deepening opportunities and file them as vertical-slice issues, over a whole repo or a chosen part.",
+  "type": "module",
+  "bin": {
+    "ralph-architecture-sweep": "bin/install.mjs"
+  },
+  "files": [
+    "bin/",
+    "skills/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.7"
+  },
+  "keywords": [
+    "claude-code",
+    "skill",
+    "ralph",
+    "architecture",
+    "refactoring",
+    "deepening",
+    "codebase",
+    "agent",
+    "npx"
+  ],
+  "license": "MIT",
+  "author": "Aijo24",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aijo24/ralph-architecture-sweep.git"
+  },
+  "homepage": "https://github.com/Aijo24/ralph-architecture-sweep#readme",
+  "bugs": {
+    "url": "https://github.com/Aijo24/ralph-architecture-sweep/issues"
+  }
+}
