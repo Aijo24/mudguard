@@ -2,7 +2,9 @@
 
 ## Scope → areas
 
-Ask the user: **whole codebase** or a **chosen part**? Map the answer to **areas**, one area per ralph loop, each diffable against an existing epic. Pick areas that are coherent subsystems (a package, a layer, a directory) so each loop has a tractable, self-contained scope.
+Resolve the scope: **whole codebase** or a **chosen part**? Take it from the invocation argument or the conversation if it's already there — ask only when genuinely ambiguous, and default to the whole codebase when running unattended. Map it to **areas**, one area per ralph loop, each diffable against an existing epic. Pick areas that are coherent subsystems (a package, a layer, a directory) so each loop has a tractable, self-contained scope.
+
+**Size areas for quality, not convenience.** A sub-agent that has to skim hundreds of files returns shallow candidates. Keep an area to roughly ≤ 50 source files / one coherent subsystem; split anything bigger along its natural seams (sub-packages, layers) into separate areas. Tiny leftovers (a stray `utils/`, config dirs) fold into the nearest neighbour rather than getting their own loop.
 
 ## Base off the remote default branch (refs lag!)
 
@@ -20,7 +22,18 @@ Always fork from the **remote** ref, never the local checkout (which may be far 
 git ls-tree -r origin/<default-branch> --name-only -- .scratch/ | grep deepening
 ```
 
-If an area already has a `…-deepening` (± `…-deepening-delta`) epic, run a **delta** sweep: the worktree (off the remote tip) sees the shipped refactors, so it can EXCLUDE them; write to `…-deepening-delta2` (bump the suffix). Tell the user "already swept N times — delta vs fresh re-sweep"; a fresh re-sweep re-finds shipped seams (waste + false candidates).
+If an area already has a `…-deepening` (± `…-deepening-delta`) epic, run a **delta** sweep: the worktree (off the remote tip) sees the shipped refactors, so it can EXCLUDE them; write to `…-deepening-delta2` (bump the suffix). **Delta is the default** — a fresh re-sweep re-finds shipped seams (waste + false candidates) — so only offer "delta vs fresh re-sweep" when the user is around to answer; unattended, just run delta and say so in the report.
+
+## Resume an interrupted sweep
+
+The checkpoint state is already on disk: per-area commits + `fix_plan.md` checkboxes. If a `ralph/<slug>` worktree exists with some areas `[x]` and some `[ ]`:
+
+```
+git -C "$WT" log --oneline -- .scratch/    # which areas committed
+grep -c '\[ \]' "$WT"/.ralph/fix_plan.md   # how many remain
+```
+
+Re-fetch and check the remote tip hasn't moved (`git rev-parse origin/<default-branch>` vs the worktree's base). Same tip → **resume from the first unchecked area**; committed areas are done, don't redo them. Tip moved → finish remaining areas off the old base, then flag in the report that the base is stale (a later delta sweep covers the gap). Never restart a sweep from zero when checkpoints exist.
 
 ## Worktree + tooling
 

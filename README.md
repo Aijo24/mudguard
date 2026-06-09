@@ -37,12 +37,13 @@ Reload the session so the skill is picked up, then invoke `/ralph-architecture-s
 
 ## Use
 
-`/ralph-architecture-sweep` — it:
+`/ralph-architecture-sweep` (or `/ralph-architecture-sweep <path-or-subsystem>` to skip the scope question) — it:
 
-1. **asks the scope** — the whole codebase or a chosen part (a subsystem / package / directory),
-2. forks a `ralph/*` **worktree off your remote default branch** (so it sees shipped refactors and won't re-find them),
-3. **sweeps** for deepening candidates (analysis-only, delta-aware) — robustly, via one sub-agent per area,
-4. writes **vertical-slice issues** + a per-area PRD under `.scratch/`, committing per area.
+1. **resolves the scope** — the whole codebase or a chosen part (a subsystem / package / directory); asks only if ambiguous, defaults to the whole codebase unattended,
+2. forks a `ralph/*` **worktree off your remote default branch** (so it sees shipped refactors and won't re-find them) — or **resumes** an interrupted sweep from its per-area checkpoints,
+3. **sweeps** for deepening candidates (analysis-only, delta-aware) — robustly, via one sub-agent per area with a one-retry policy,
+4. **verifies every candidate independently** — replays the evidence, re-argues the deletion test, dedupes seams across areas; unverifiable candidates are dropped, not filed,
+5. writes **vertical-slice issues** + a per-area PRD under `.scratch/`, lint-checked against the issue template, committing per area.
 
 Nothing is pushed — you review the issues before merging or implementing.
 
@@ -65,6 +66,7 @@ Keep infrastructure (servers, SSH, secrets, domains, deploy commands) **out of t
 - **Seam** — one rule across N call sites, or 2+ adapters over the same data.
 - **Vertical-slice issue** — the deep module + every call site repointed + tests at the new interface + the old copies deleted, as one independently-grabbable ticket.
 - **Robust driving** — headless ralph commits only at the end of an iteration, so a long analysis call that drops loses everything; this skill drives the sweep via short sub-agents instead.
+- **Propose / verify split** — a fresh verifier (that never sees the proposer's reasoning, only its claims) replays each candidate's evidence and re-argues the deletion test; "Strong" must be earned (≥ 3 independent call sites, or 2+ adapters over the same data).
 
 ## Credits
 
