@@ -1,5 +1,6 @@
 # ralph-architecture-sweep
 
+[![Skills](https://skills.sh/b/Aijo24/ralph-architecture-sweep)](https://skills.sh/Aijo24/ralph-architecture-sweep)
 [![npm version](https://img.shields.io/npm/v/ralph-architecture-sweep.svg)](https://www.npmjs.com/package/ralph-architecture-sweep)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -14,7 +15,15 @@ It runs the "deepening" methodology — deep vs shallow modules, the **deletion 
 
 ## Install
 
-**With `npx` (recommended)** — run from your project root:
+**With the `skills` CLI (recommended)** — run from your project root:
+
+```bash
+npx skills add Aijo24/ralph-architecture-sweep
+```
+
+This is the install path tracked by [skills.sh](https://skills.sh/Aijo24/ralph-architecture-sweep).
+
+**With the dedicated installer** — if you prefer the npm package:
 
 ```bash
 npx ralph-architecture-sweep            # → ./.claude/skills/ralph-architecture-sweep
