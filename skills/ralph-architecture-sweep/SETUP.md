@@ -40,7 +40,8 @@ Re-fetch and check the remote tip hasn't moved (`git rev-parse origin/<default-b
 ```
 WT=<repo-parent>/ralph-<slug>-wt
 git worktree add "$WT" -b ralph/<slug> origin/<default-branch>
-# if ralph's tooling is untracked, copy it into the worktree:
+# if ralph's tooling is untracked, copy your LOCAL checkout into the worktree
+# (this is a local file copy — nothing is downloaded from the network):
 cp -R <repo>/ralph-claude-code "$WT"/ && cp <repo>/.ralphrc "$WT"/
 ```
 

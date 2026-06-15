@@ -5,9 +5,13 @@ description: Drive the ralph autonomous loop to run an architecture-deepening sw
 
 # Ralph Architecture Sweep
 
-Drive **ralph** ([frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code)) to sweep a codebase for **architecture-deepening opportunities** and file them as **vertical-slice issues** — over the **whole codebase or a user-chosen part**. Optionally chain ralph to implement + deploy the issues (project-specific — see [EXTENDING.md](EXTENDING.md)).
+Drive **ralph** — the autonomous loop by Frank Bria ([frankbria/ralph-claude-code](https://github.com/frankbria/ralph-claude-code), MIT) — to sweep a codebase for **architecture-deepening opportunities** and file them as **vertical-slice issues** — over the **whole codebase or a user-chosen part**. Optionally chain ralph to implement + deploy the issues (project-specific — see [EXTENDING.md](EXTENDING.md)).
 
 Requires ralph installed in the repo (`ralph-claude-code/`, `.ralphrc`, `.ralph/`) and Claude Code. The deepening vocabulary (deep vs shallow modules, the deletion test, seams) and the vertical-slice issue format are the methodology this skill drives ralph through — from Matt Pocock's `improve-codebase-architecture` + `to-issues` skills ([mattpocock/skills](https://github.com/mattpocock/skills); see the repo README for full credits).
+
+## Provenance & safety
+
+This skill **downloads, installs, and fetches nothing.** The GitHub links above are **attribution**, not install sources — ralph is a separate, third-party MIT tool you install and audit yourself before using it. This skill only ever invokes `ralph-claude-code/ralph_loop.sh` when that script is **already present in your own repo**, and only on the **opt-in** headless path (see [SWEEP.md](SWEEP.md) → "Alternative: headless ralph loop"); the default sub-agent path runs no external script at all. The `cp -R <repo>/ralph-claude-code …` step in [SETUP.md](SETUP.md) copies *your* local checkout into a worktree — it does not pull from the network.
 
 ## Non-negotiable guardrails
 
