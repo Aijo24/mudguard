@@ -1,4 +1,16 @@
-# ralph-architecture-sweep
+# mudguard
+
+> Versions 0.1.0–0.2.0 shipped under the project's former name, `ralph-architecture-sweep` (see [0.3.0](#030) for the rename). Historical entries below are left as-shipped.
+
+## 0.3.0
+
+### Minor Changes
+
+- **Breaking — renamed `ralph-architecture-sweep` → `mudguard`.** Command `/ralph-architecture-sweep` → `/mudguard` (plugin: `/mudguard:mudguard`); npm package `mudguard` (the old `ralph-architecture-sweep` package is deprecated and points here); plugin install `/plugin marketplace add Aijo24/mudguard` + `/plugin install mudguard@aijo24`; worktree branches `mudguard/*`. The project is no longer "a ralph sweep" — it's an orchestration + verification layer for architecture deepening, and the name reflects that.
+
+- **Decouple the loop engine.** The pipeline is now engine-neutral: the default drives the sweep via short sub-agents (no external engine), and a new `DRIVERS.md` covers running the hands-off loop on a swappable driver — ralph (the reference), Claude Code's native `/loop`, or Codex. ralph-specific mechanics (tooling copy, commit-at-end caveat, `ralph_loop.sh`, `.ralphrc`, per-call timeout) moved out of the core narrative into the ralph driver section.
+
+- **Reposition the README around the differentiator** — lead with "autonomous, independently-verified architecture deepening, the headless counterpart of the now-interactive architecture skills" rather than "drives ralph through a sweep"; the engine is framed as interchangeable.
 
 ## 0.2.0
 

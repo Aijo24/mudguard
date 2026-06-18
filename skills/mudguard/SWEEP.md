@@ -1,8 +1,8 @@
 # Sweep — drive analysis-only, robustly (Phase 2)
 
-## Why not just launch headless ralph
+## Why sub-agents are the default
 
-Headless ralph (`claude -p`, JSON mode) **commits only at the END of a successful iteration**. A single area's sweep is one long call (minutes); if it drops mid-stream (e.g. an API socket-drop), the whole iteration AND its spend are discarded, and auto-reset just re-burns long calls until the circuit breaker. Short interactive calls don't have this failure mode. **So for an analysis-only sweep, drive it from the interactive session, not headless.**
+A single area's sweep is one long call (minutes). If you run it as one long headless loop iteration and it drops mid-stream (e.g. an API socket-drop), the whole iteration and its spend can be discarded — and some drivers (ralph) only commit at the *end* of an iteration, so the work is lost. Short sub-agent / interactive calls don't have this failure mode. **So drive the analysis-only sweep via short sub-agents, not one long headless call** — regardless of which loop driver you'd use for the hands-off variant ([DRIVERS.md](DRIVERS.md)).
 
 ## Default: fan out sub-agents (one per area)
 
@@ -13,7 +13,7 @@ Run the areas in parallel via the agent tool. Each sub-agent:
 - applies the **deletion test** + deep/shallow/seam vocab,
 - returns ONLY genuinely-new candidates (or an explicit "zero"), each with: title, strength, **evidence** (files + symbols + call-site count, **with the exact grep/command that produced the count** so it can be replayed), proposed seam, deletion-test verdict, and an exclusion check ("not a re-proposal of `<epic/issue>` because …").
 
-**Retry policy** — a sub-agent that errors out, times out, or returns ungrounded hand-waving gets **one retry with a narrower brief** (fewer directories, or "evidence-first: list call sites before naming a seam"). Still bad after the retry → mark the area `[!] needs manual look` in `fix_plan.md` and move on; never stall the whole sweep on one area, and never pad the report with its ungrounded output.
+**Retry policy** — a sub-agent that errors out, times out, or returns ungrounded hand-waving gets **one retry with a narrower brief** (fewer directories, or "evidence-first: list call sites before naming a seam"). Still bad after the retry → mark the area `[!] needs manual look` in the area checklist and move on; never stall the whole sweep on one area, and never pad the report with its ungrounded output.
 
 ## Verification pass — no candidate ships unverified
 
@@ -42,29 +42,20 @@ Every issue file must pass this checklist; fix or drop, don't commit a partial:
 - [ ] Evidence includes the replayable command(s) + counts
 - [ ] The issue is a **vertical slice** — independently grabbable, no "part 1 of 3"
 
-## Alternative: headless ralph loop
+## Alternative: a hands-off loop driver
 
-If you want the literal hands-off loop and the API is calm:
-
-```
-# reset a stale session FIRST, in a SEPARATE invocation (it exits without looping):
-bash ralph-claude-code/ralph_loop.sh --reset-session
-# then run:
-bash ralph-claude-code/ralph_loop.sh --live --verbose --auto-reset-circuit
-```
-
-Monitor `.ralph/live.log` + `.ralph/status.json` (`status:"completed"`). Watch for dropped long calls — stop the loop and switch to sub-agents rather than letting auto-reset churn.
+If you want the literal hands-off loop instead of driving via sub-agents, run it through a driver — ralph (reference), Claude Code's native `/loop`, or Codex — see [DRIVERS.md](DRIVERS.md) for the exact commands and the per-driver caveats. Watch for dropped long calls and switch back to sub-agents if a driver churns.
 
 ## Output + commit
 
-Write `.scratch/<area>-deepening[-delta2]/PRD.md` + `issues/NN-<slug>.md` in the vertical-slice format. Commit per area, staging ONLY those files (never `git add -A` — the worktree has untracked tooling / runtime state):
+Write `.scratch/<area>-deepening[-delta2]/PRD.md` + `issues/NN-<slug>.md` in the vertical-slice format. Commit per area, staging ONLY those files (never `git add -A` — the worktree may hold untracked driver tooling / runtime state):
 
 ```
 git -C "$WT" add .scratch/<area>-deepening-delta2
 git -C "$WT" commit -m "docs(arch): <delta-vN> sweep — <area> (N new candidate(s))"
 ```
 
-Mark the area `[x]` in `fix_plan.md` **immediately after its commit** (that pair is the resume checkpoint — see SETUP.md). **Do not push.**
+Mark the area `[x]` in the area checklist **immediately after its commit** (that pair is the resume checkpoint — see SETUP.md). **Do not push.**
 
 ## Report
 

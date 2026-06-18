@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-// Installer for the "ralph-architecture-sweep" Claude Code skill (FALLBACK path).
+// Installer for the "mudguard" Claude Code skill (FALLBACK path).
 // Copies the bundled skill into a project's (or the global) .claude/skills/ dir.
 // No dependencies — pure Node (>=16.7 for fs.cpSync).
 //
-// Prefer `npx skills add Aijo24/ralph-architecture-sweep` (tracked by skills.sh) or the
-// Claude Code plugin (`/plugin install ralph-architecture-sweep@aijo24`, which adds version
-// tracking + `/plugin update`). This installer exists for setups without either.
+// Prefer `npx skills add Aijo24/mudguard` (tracked by skills.sh) or the Claude Code
+// plugin (`/plugin install mudguard@aijo24`, which adds version tracking + `/plugin
+// update`). This installer exists for setups without either.
 // Maintainers: keep `version` in sync across package.json and .claude-plugin/plugin.json.
 import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 
-const SKILL = "ralph-architecture-sweep";
+const SKILL = "mudguard";
 const here = dirname(fileURLToPath(import.meta.url));
 const src = join(here, "..", "skills", SKILL);
 
@@ -27,7 +27,7 @@ Usage:
   npx ${SKILL} --global         install into ~/.claude/skills (all projects)
   npx ${SKILL} --help
 
-Requires ralph in your repo: https://github.com/frankbria/ralph-claude-code
+A loop driver is optional (the default drives via sub-agents); for a hands-off loop see DRIVERS.md.
 After installing, reload Claude Code and run /${SKILL}.
 `);
   process.exit(0);
@@ -66,4 +66,4 @@ if (!hadClaude) {
   process.stdout.write(`[${SKILL}] note: created ${claudeDir} (no .claude/ existed here)\n`);
 }
 process.stdout.write(`[${SKILL}] next: reload Claude Code, then run /${SKILL}\n`);
-process.stdout.write(`[${SKILL}] requires ralph: https://github.com/frankbria/ralph-claude-code\n`);
+process.stdout.write(`[${SKILL}] drivers (optional, for a hands-off loop): see DRIVERS.md\n`);

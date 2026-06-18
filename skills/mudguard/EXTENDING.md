@@ -6,14 +6,14 @@ The sweep (Phases 0–2) is portable. Implementing the filed issues and shipping
 
 ## Implement loop
 
-After you review the filed issues, you can chain ralph to implement them:
+After you review the filed issues, you can chain a loop to implement them:
 
 - Fork an impl worktree off the sweep branch (so it has the issues), bootstrap your deps.
-- Write an implement `.ralph/PROMPT.md` / `fix_plan.md`: **one ticket per loop**, **Strong-first**, behaviour-preserving (deletion test), each a vertical slice (the deep module + every call site repointed + tests at the new interface + the old inline copies deleted), then **your gates**, a changelog entry, and a conventional commit staging only changed files (never `git add -A`).
+- Write the implement per-iteration spec + area checklist (for the ralph driver, `.ralph/PROMPT.md` / `.ralph/fix_plan.md` — see [DRIVERS.md](DRIVERS.md)): **one ticket per iteration**, **Strong-first**, behaviour-preserving (deletion test), each a vertical slice (the deep module + every call site repointed + tests at the new interface + the old inline copies deleted), then **your gates**, a changelog entry, and a conventional commit staging only changed files (never `git add -A`).
 - Drive each ticket through Matt Pocock's `/tdd` skill (it's **model-invoked**, so — unlike the interactive sweep skills — it's loop-safe to reference): one tracer test red, then green, one slice at a time. Let the loop inherit that discipline instead of re-deriving red-green-refactor in the prompt; the vertical-slice contract above stays the definition of done.
 - When a shipped slice encodes a **hard-to-reverse design decision**, have the loop run `/domain-modeling` (model-invoked, loop-safe) to record an ADR / update `CONTEXT.md`, so the *next* sweep excludes it via the respect-your-ADRs guardrail — closing the producer→consumer loop end to end. Implement-side only: the analysis-only sweep never writes ADRs.
-- Launch `ralph-claude-code/ralph_loop.sh --live --verbose --auto-reset-circuit`; monitor per-ticket commits (`git log` / `.ralph/live.log`).
-- **Per-call timeout (`CLAUDE_TIMEOUT_MINUTES` in `.ralphrc`):** ralph is not strictly one-ticket-per-loop — a single session can power through several tickets and get **cut mid-edit** on a later one (the iteration times out; this is NOT a crash or a drop, and `status.json` may still read `running`). **Finish the cut tail inline**, re-gate, commit — do NOT relaunch into a dirty tree.
+- Launch your driver's loop (for ralph: `ralph-claude-code/ralph_loop.sh --live --verbose --auto-reset-circuit` — see [DRIVERS.md](DRIVERS.md)); monitor per-ticket commits (`git log` / the driver's live log).
+- **Per-iteration timeout:** a loop driver may power through several tickets and get **cut mid-edit** on a later one when its iteration times out (for ralph, `CLAUDE_TIMEOUT_MINUTES` in `.ralphrc`; this is NOT a crash or a drop, and the driver status may still read `running`). **Finish the cut tail inline**, re-gate, commit — do NOT relaunch into a dirty tree. See [DRIVERS.md](DRIVERS.md).
 
 ## Gates
 

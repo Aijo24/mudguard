@@ -1,12 +1,12 @@
 {
   "name": "aijo24",
   "owner": { "name": "Aijo24" },
-  "description": "Aijo24's Claude Code skills marketplace — home of ralph-architecture-sweep.",
+  "description": "Aijo24's Claude Code skills marketplace — home of mudguard.",
   "plugins": [
     {
-      "name": "ralph-architecture-sweep",
+      "name": "mudguard",
       "source": "./",
-      "description": "Drive the ralph autonomous loop to sweep a codebase for architecture-deepening opportunities (the deletion-test methodology) and file them as vertical-slice issues — whole repo or a chosen part."
+      "description": "Autonomous, independently-verified architecture deepening — sweep a codebase for deep-module/deletion-test opportunities and file them as vertical-slice issues, headless and delta-aware, over a whole repo or a chosen part."
     }
   ]
 }
