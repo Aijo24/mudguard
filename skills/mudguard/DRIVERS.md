@@ -35,7 +35,7 @@ For a **literal hands-off autonomous loop** (especially the optional implement p
 Claude Code ships a built-in `/loop` that runs a prompt or command on a recurring cadence (or self-paced). To use it as a driver:
 
 - Put the per-iteration spec (the inlined methodology + the one-area brief) in the `/loop` prompt; keep the area checklist as a plain `fix_plan.md` in the worktree.
-- One iteration = one area: the prompt picks the first unchecked area, sweeps it, writes `.scratch/<area>-deepening*/`, commits, ticks the box. Per-area commits + the checklist are the same resume checkpoint.
+- One iteration = one area: the prompt picks the first unchecked area, sweeps it, writes `.scratch/<area>-deepening*/` (PRD + issues + `RECEIPT.md`), commits, ticks the box. Per-area commits + the checklist are the same resume checkpoint.
 - No external tooling to copy, no `.ralphrc`. The analysis-only / no-push / worktree guardrails are enforced in the prompt itself.
 - Because `/loop` iterations are ordinary turns (not one long headless call), they avoid ralph's commit-at-end failure mode — but still keep each iteration to one area so a drop costs at most one area.
 
@@ -49,4 +49,4 @@ Codex's agentic automations converge on the same shape — a repeated, self-chec
 
 ## Adding a driver
 
-A driver only has to: (1) run one area per iteration off the per-iteration spec, (2) commit per area and tick the checklist (the resume checkpoint), (3) honour the analysis-only / no-push / worktree guardrails. Anything that can do that — a CI loop, a cron agent, a future native primitive — is a valid driver. The mudguard layer (methodology + propose/verify + delta + ADR closure) is unchanged.
+A driver only has to: (1) run one area per iteration off the per-iteration spec, (2) commit per area — the whole-dir `git add` stages PRD + issues + `RECEIPT.md` together — and tick the checklist (the resume checkpoint), (3) honour the analysis-only / no-push / worktree guardrails. Anything that can do that — a CI loop, a cron agent, a future native primitive — is a valid driver. The mudguard layer (methodology + propose/verify + delta + ADR closure) is unchanged.

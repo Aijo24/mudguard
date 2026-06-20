@@ -35,6 +35,8 @@ grep -c '\[ \]' "$WT"/fix_plan.md          # how many remain (ralph driver: .ral
 
 Re-fetch and check the remote tip hasn't moved (`git rev-parse origin/<default-branch>` vs the worktree's base). Same tip → **resume from the first unchecked area**; committed areas are done, don't redo them. Tip moved → finish remaining areas off the old base, then flag in the report that the base is stale (a later delta sweep covers the gap). Never restart a sweep from zero when checkpoints exist.
 
+**Resume reads only `git log -- .scratch/` + the `fix_plan.md` boxes — never `RECEIPT.md`** (the receipt is a delta-exclusion artifact for a *later* sweep, not resume state). The authoritative done-signal is *a per-area commit exists for the area*; the `[x]` box is a convenience mirror. In the commit-before-tick window the `git log` check wins — re-tick the box, don't re-sweep the area, and never treat a receipt's mere presence as done-ness.
+
 ## Worktree + tooling
 
 ```
@@ -53,9 +55,10 @@ The default sub-agent path needs **no** install/deps — the worktree is enough.
 - **Seam** — a place you can change behaviour without editing there. A *real* seam is one rule duplicated across N call sites, or 2+ real adapters over the same data; a single adapter is only a hypothetical seam (don't extract for it).
 - **Adapter** — a concrete implementation satisfying an interface at a seam. **Depth** — how much behaviour a module hides behind its interface (the leverage you buy for the interface you pay for).
 - **Deletion test** — imagine deleting the proposed module: complexity *vanishes* = it was a pass-through (reject); complexity *reappears across N callers* = it earns its keep (propose).
+- **Oracle** — a candidate's replayable signal: the exact grep/command + the files/symbols/call-site count it must reproduce, **plus** its deletion-test verdict. The proposer records it *before* an issue is shaped; the verifier files the issue only if it can **replay** the oracle. Binary (reproduce-or-die) — *strength* owns the call-site threshold, the oracle never does.
 - **Behaviour-preserving** — a deepening never changes observable behaviour; it relocates it behind a better interface.
 
-**Issues (vertical slice):** one issue per candidate — *What to build* (the deep module/seam + every call site repointed + tests at the new interface + old copies deleted) / *Acceptance criteria* / *Deletion-test verdict* / *Strength* (Strong / Worth-exploring) / *Blocked by*. Tests assert observable behaviour **through** the new interface — a test that has to reach past the interface means the module is the wrong shape. Plus a per-area `PRD.md` (Problem / Candidates / Out of scope).
+**Issues (vertical slice):** one issue per candidate — *What to build* (the deep module/seam + every call site repointed + tests at the new interface + old copies deleted) / *Acceptance criteria* / *Oracle* (the replayable command + counts **and** the deletion-test verdict) / *Strength* (Strong / Worth-exploring) / *Blocked by*. Tests assert observable behaviour **through** the new interface — a test that has to reach past the interface means the module is the wrong shape. Plus a per-area `PRD.md` (Problem / Candidates / Out of scope).
 
 The area checklist = one `- [ ]` per area (a driver may log progress from it — ralph logs "Remaining tasks: N" at startup — confirming the scoping). Bake the guardrails into the per-iteration spec: analysis-only (writes only under `.scratch/<area>-deepening*/`), no push, **respect your ADRs** (never re-propose a settled decision — flag, don't fork), and **re-verify every candidate against the remote tip**. If you keep a decision record — a `CONTEXT.md` and/or an ADR log, e.g. the ones Matt Pocock's `domain-modeling` skill writes inline — feed it into the exclusion map alongside the existing epics, so the sweep treats those settled decisions as out of scope. No record yet? The guardrail is simply a no-op; the sweep still runs.
 

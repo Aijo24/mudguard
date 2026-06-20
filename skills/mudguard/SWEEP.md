@@ -11,7 +11,7 @@ Run the areas in parallel via the agent tool. Each sub-agent:
 - operates in the **worktree** (absolute paths — it's at the remote tip, so it sees the shipped refactors),
 - **reads the area's existing epic(s) first — plus any `CONTEXT.md` / ADR log** (the settled-decision record, e.g. the one `domain-modeling` writes) — to build the exclusion list,
 - applies the **deletion test** + deep/shallow/seam vocab,
-- returns ONLY genuinely-new candidates (or an explicit "zero"), each with: title, strength, **evidence** (files + symbols + call-site count, **with the exact grep/command that produced the count** so it can be replayed), proposed seam, deletion-test verdict, and an exclusion check ("not a re-proposal of `<epic/issue>` because …").
+- returns ONLY genuinely-new candidates (or an explicit "zero"), each with: title, strength, **evidence** (files + symbols + call-site count, **with the exact grep/command that produced the count** so it can be replayed), proposed seam, deletion-test verdict, and an exclusion check ("not a re-proposal of `<epic/issue>` because …"). That replayable evidence **plus** the deletion-test verdict is the candidate's **oracle** — the observable, reproducible signal the verifier tests against; a candidate with no replayable oracle can't be filed.
 
 **Retry policy** — a sub-agent that errors out, times out, or returns ungrounded hand-waving gets **one retry with a narrower brief** (fewer directories, or "evidence-first: list call sites before naming a seam"). Still bad after the retry → mark the area `[!] needs manual look` in the area checklist and move on; never stall the whole sweep on one area, and never pad the report with its ungrounded output.
 
@@ -19,7 +19,7 @@ Run the areas in parallel via the agent tool. Each sub-agent:
 
 After the proposal fan-out, **independently re-ground every candidate** against the remote tip before writing anything (a fresh verifier sub-agent per area works well — it must not see the proposer's reasoning, only its claims):
 
-1. **Replay the evidence**: run the candidate's own grep/commands; the files, symbols and call-site count must reproduce. Off-by-a-couple is fine to correct in place; "can't reproduce" kills the candidate.
+1. **Replay the evidence** — *this replay is the candidate's oracle*: run the candidate's own grep/commands; the files, symbols and call-site count must reproduce. Off-by-a-couple is fine to correct in place; "can't reproduce" kills the candidate. The oracle is **binary** — it replays or the candidate dies — and carries **no** strength threshold (that's step 4): a *Worth-exploring* candidate with < 3 sites still passes its oracle.
 2. **Re-argue the deletion test** from the call sites found, not from the proposer's summary (the `codebase-design` vocabulary — depth, a *real* seam vs a single-adapter hypothetical — is the rubric for borderline verdicts). Verdict flips → drop.
 3. **Re-check the exclusion list**: is this a re-proposal of a filed/shipped seam or a settled ADR under a new name?
 4. **Strength is earned, not asserted**: *Strong* needs ≥ 3 independent call sites (or 2+ adapters over the same data) plus a deletion-test verdict that survives step 2; anything weaker is *Worth-exploring*. Downgrade silently; never upgrade.
@@ -36,10 +36,9 @@ Every issue file must pass this checklist; fix or drop, don't commit a partial:
 
 - [ ] *What to build* names the deep module/seam **and** lists every call site to repoint (paths, not "etc.")
 - [ ] *Acceptance criteria* are checkable — tests at the new interface (asserting behaviour **through** it, not reaching past it), old copies deleted
-- [ ] *Deletion-test verdict* is stated with the reasoning, not just "passes"
+- [ ] The **oracle** is present and replayable — the exact command(s) + counts reproduce **and** the *deletion-test verdict* is stated with its reasoning (not just "passes")
 - [ ] *Strength* matches the verification rubric above
 - [ ] *Blocked by* names a real issue file or "none"
-- [ ] Evidence includes the replayable command(s) + counts
 - [ ] The issue is a **vertical slice** — independently grabbable, no "part 1 of 3"
 
 ## Alternative: a hands-off loop driver
@@ -48,7 +47,7 @@ If you want the literal hands-off loop instead of driving via sub-agents, run it
 
 ## Output + commit
 
-Write `.scratch/<area>-deepening[-delta2]/PRD.md` + `issues/NN-<slug>.md` in the vertical-slice format. Commit per area, staging ONLY those files (never `git add -A` — the worktree may hold untracked driver tooling / runtime state):
+Write `.scratch/<area>-deepening[-delta2]/PRD.md` + `issues/NN-<slug>.md` + `RECEIPT.md` (below) in the vertical-slice format. Commit per area, staging ONLY that directory (never `git add -A` — the worktree may hold untracked driver tooling / runtime state); the whole-dir add already carries the receipt:
 
 ```
 git -C "$WT" add .scratch/<area>-deepening-delta2
@@ -56,6 +55,25 @@ git -C "$WT" commit -m "docs(arch): <delta-vN> sweep — <area> (N new candidate
 ```
 
 Mark the area `[x]` in the area checklist **immediately after its commit** (that pair is the resume checkpoint — see SETUP.md). **Do not push.**
+
+### RECEIPT.md — a compact, SHA-anchored proof per area
+
+Each area writes one `RECEIPT.md` beside its `PRD.md`, **rewritten whole** each area-attempt (never appended — a re-swept area's receipt fully replaces any partial from an aborted attempt, exactly like `PRD.md`). It is a **derived digest of pointers, never a copy**: it records the base SHA the sweep was verified against and *points* at the authoritative artifacts — it never re-types a rejection reason or a strength.
+
+```
+# RECEIPT — <area> — gen N
+base: <full 40-char SHA of origin/<default-branch>, captured at preflight>
+generation: N            # bare epic = 1, -deltaN = N  (numeric, never lexical)
+filed:    issues/01-<slug>.md, issues/02-<slug>.md       # the authoritative issue files
+rejected: see PRD.md §rejected (<count>)                 # the PRD owns the reasons
+merged:   <NN-slug> merged-into <other-area>/issues/NN   # cross-area pointer, mirrors the PRD — a pointer, not a filed candidate
+```
+
+- **base** = the single preflight `origin/<default-branch>` SHA (SETUP.md), the **same value for every area** in the sweep — never a per-area `HEAD`. Record the **full** 40-char SHA (a `--short` can go ambiguous on an old repo and break `git log <sha>..`). The area commit's own SHA is deliberately omitted: it's always recoverable via `git log -- .scratch/<area>-deepening*/`, whereas the fork-point base is not, once the worktree is removed.
+- **Authority rule:** `PRD.md` + `issues/` are the **sole** record of what was filed and rejected; `RECEIPT.md` is a derived digest — **never authoritative**. On any conflict the PRD/issues win and the receipt is regenerated. It is **never read to decide resume** (resume = per-area commit + ticked `fix_plan.md` box) — only a *later delta sweep* reads it.
+- A **zero-candidate** area still writes a receipt (base SHA, empty `filed`, the rejected count). That's what lets a later sweep tell "swept clean @ this base" from "never swept".
+
+> The *read* path — a later sweep consuming these receipts (newest generation by `max(N)`, a path-scoped `git log <base>..origin -- <area paths>` no-op test, loading the pointers as an exclusion map) — is the delta payoff and lands as a **separate** increment; this section only **writes** the receipt.
 
 ## Report
 
