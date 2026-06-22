@@ -1,6 +1,6 @@
 {
   "name": "mudguard",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Installer for the mudguard Claude Code skill — autonomous, independently-verified architecture deepening: sweep a codebase for deep-module/deletion-test opportunities and file them as vertical-slice issues, over a whole repo or a chosen part.",
   "type": "module",
   "bin": {

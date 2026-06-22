@@ -2,6 +2,20 @@
 
 > Versions 0.1.0–0.2.0 shipped under the project's former name, `ralph-architecture-sweep` (see [0.3.0](#030) for the rename). Historical entries below are left as-shipped.
 
+## 0.5.0
+
+The receipt **read-path** — the increment deferred in 0.4.0 (Inc-2). 0.4.0 made every area *write* a SHA-anchored receipt; 0.5.0 makes the next delta sweep *consume* it, so the sweep finally **compounds across runs** instead of re-doing work every time. This was the riskiest part for delta correctness, so it shipped on its own and was built **fail-open** by design: any uncertainty re-sweeps rather than silently suppress a now-real seam.
+
+### Minor Changes
+
+- **Whole-area no-op skip.** In preflight, a delta sweep takes each area's newest receipt and tests `git log <last_base>..origin/<branch> -- <area paths>`; if the base is reachable, an ancestor of the tip, every path still resolves, and the log is empty, the area hasn't changed since it was last swept → it is **skipped** (no proposer runs), writes a minimal no-op receipt (`proposed: 0`, `noop: no change since <last_base>`), and is reported as "swept clean @ base, skipped." ([SETUP.md](skills/mudguard/SETUP.md) §Delta read-path.)
+
+- **Per-seam rejection memory.** For an area that *did* change, the proposer's exclusion map now also carries the prior sweep's **rejected seams**, **unioned across all generation receipts** (each receipt holds only its own generation's kills, so newest-only would forget older ones). Each is re-tested against its *own* anchor (`git log <rejection.base>..origin -- <rejection.paths>`): unchanged → excluded so it isn't re-proposed and re-killed full-freight; changed → re-evaluated fresh (a single-adapter hypothetical may have gained a second adapter). This is the negative-result memory the loop was missing. ([SETUP.md](skills/mudguard/SETUP.md) §Delta read-path.)
+
+- **Fail-open prime directive.** Whenever the read-path cannot *confirm* an area or seam is unchanged — base SHA unreachable, not an ancestor (force-push / rewritten history), a path no longer resolves, or a receipt is missing / pre-v0.4.0 / unparseable — it neither skips nor excludes: it sweeps and re-evaluates, and logs what it couldn't use. Old epics with no v2 receipt fall back to the prior behaviour (epics + CONTEXT/ADR exclusions only).
+
+- **Invariants preserved.** The receipt is still a **hint, never authority** (PRD/issues own filed/rejected); resume still reads only `git log -- .scratch/` + the `fix_plan.md` boxes and **never** a receipt (a no-op-skipped area is "done" via its commit + tick). The report gains the skip/exclude/re-evaluate counts.
+
 ## 0.4.0
 
 The receipt stops being a bare delta marker and becomes the substrate that makes the sweep **compound across runs**. One artifact (`RECEIPT.md`) now does three jobs — survival accounting, negative-result memory, and a durability flag — and the verifier is hardened one level down. This is the **write-side** increment (Inc-1); the receipt **read-path** (Inc-2) is specced and flagged but deliberately landed separately.
