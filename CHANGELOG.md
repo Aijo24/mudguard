@@ -2,6 +2,24 @@
 
 > Versions 0.1.0–0.2.0 shipped under the project's former name, `ralph-architecture-sweep` (see [0.3.0](#030) for the rename). Historical entries below are left as-shipped.
 
+## 0.4.0
+
+The receipt stops being a bare delta marker and becomes the substrate that makes the sweep **compound across runs**. One artifact (`RECEIPT.md`) now does three jobs — survival accounting, negative-result memory, and a durability flag — and the verifier is hardened one level down. This is the **write-side** increment (Inc-1); the receipt **read-path** (Inc-2) is specced and flagged but deliberately landed separately.
+
+### Minor Changes
+
+- **Survival gate — scale *Strong* to the proposer's noise.** The `Strong = ≥ 3 call sites` bar was fixed regardless of how many candidates an area fired — the multiple-comparisons hole: an area that proposed 20 and kept 2 cleared the same bar as one that proposed 3 and kept 2. The verification pass now tallies `proposed` (the proposer's full output, including oracle-replay failures) and `survival_rate`, and when `proposed ≥ 8` raises the bar on noisy areas (`survival < 0.33` → `≥ 4` sites; `< 0.15` → `≥ 5`) and flags them `noisy_proposer`. Survivors that no longer clear the raised bar are **downgraded** to *Worth-exploring* — never rejected, never upgraded, so the rate can't feed back on itself. ([SWEEP.md](skills/mudguard/SWEEP.md) step 5.)
+
+- **Churn — a per-area durability / collision-risk flag.** A Strong seam in a stable core and one in a package three people are rewriting this sprint are not the same finding. Each area now records `churn_30d` (commits + files touched under its paths in the 30 days before `base`) and a `durable` / `active` / `collision-risk` label — a short-half-life finding may be obsolete before it's triaged and is a merge-conflict risk for the implement phase. Distinct from the read-path's *drift-since-base* test (empty on a fresh sweep). The implement loop is now **durability-aware** (collision-risk areas first, or held). ([SWEEP.md](skills/mudguard/SWEEP.md) §Churn, [EXTENDING.md](skills/mudguard/EXTENDING.md).)
+
+- **Verifier independent search (out-of-sample, one level down).** Step 1 replayed the proposer's *own* grep — which catches a fabricated count but not a proposer that quietly chose a narrow grep finding only what it wanted. The verifier now **derives the call-site set with its own canonical search** and corrects a cherry-picked count to its own. The candidate no longer picks the evidence its own gate runs on. ([SWEEP.md](skills/mudguard/SWEEP.md) step 1.)
+
+- **Receipt schema v2 — negative-result memory + survival + churn, still pointer-authority.** `RECEIPT.md` gains `paths`, `proposed`/`strong`/`worth_exploring`/`survival_rate`/`noisy_proposer`, `churn_30d`, and a SHA-anchored `rejected[]` list (each entry: `seam` + `paths` + `oracle_at_base` + a **pointer** to the PRD for the prose reason). Every field is a tally, a git stat, or a pointer — all regenerable — so the **authority rule is unchanged**: `PRD.md` + `issues/` stay the sole record of what was filed/rejected and *why*; the receipt is never authoritative and never read on resume. The report table gains `Proposed` / `Survival` / `Durability` columns. ([SWEEP.md](skills/mudguard/SWEEP.md) §RECEIPT.md.)
+
+### Deferred (Inc-2, next)
+
+- **Receipt read-path** — a later sweep consuming receipts: load `rejected[].seam` into the exclusion map (so a killed seam isn't re-proposed and re-killed full-freight every run), then run the path-scoped `git log <base>..origin -- <paths>` no-op test per rejection — unchanged → keep excluding; churned → the rejection may have expired (a single-adapter hypothetical becomes a real seam once a second adapter lands), allow a re-propose. Specced in [SWEEP.md](skills/mudguard/SWEEP.md) §RECEIPT.md and [SETUP.md](skills/mudguard/SETUP.md); lands as its own independently-verified increment because it's the riskiest part for delta correctness.
+
 ## 0.3.0
 
 ### Minor Changes

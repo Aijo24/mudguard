@@ -1,6 +1,6 @@
 {
   "name": "mudguard",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Autonomous, independently-verified architecture deepening — sweep a codebase for deep-module/deletion-test opportunities and file them as vertical-slice issues, headless and delta-aware, over a whole repo or a chosen part.",
   "author": { "name": "Aijo24" },
   "homepage": "https://github.com/Aijo24/mudguard#readme",

@@ -2,7 +2,7 @@
 
 ## Scope → areas
 
-Resolve the scope: **whole codebase** or a **chosen part**? Take it from the invocation argument or the conversation if it's already there — ask only when genuinely ambiguous, and default to the whole codebase when running unattended. Map it to **areas**, one area per loop iteration, each diffable against an existing epic. Pick areas that are coherent subsystems (a package, a layer, a directory) so each iteration has a tractable, self-contained scope.
+Resolve the scope: **whole codebase** or a **chosen part**? Take it from the invocation argument or the conversation if it's already there — ask only when genuinely ambiguous, and default to the whole codebase when running unattended. Map it to **areas**, one area per loop iteration, each diffable against an existing epic. Pick areas that are coherent subsystems (a package, a layer, a directory) so each iteration has a tractable, self-contained scope. **Record each area's source path(s)** (the directories/globs it covers): they become the area's `paths` in the receipt and the unit the churn measure and the delta no-op test both run against ([SWEEP.md](SWEEP.md)).
 
 **Size areas for quality, not convenience.** A sub-agent that has to skim hundreds of files returns shallow candidates. Keep an area to roughly ≤ 50 source files / one coherent subsystem; split anything bigger along its natural seams (sub-packages, layers) into separate areas. Tiny leftovers (a stray `utils/`, config dirs) fold into the nearest neighbour rather than getting their own iteration.
 
@@ -10,7 +10,7 @@ Resolve the scope: **whole codebase** or a **chosen part**? Take it from the inv
 
 ```
 git fetch origin <default-branch>                                    # e.g. main
-git rev-parse --short origin/<default-branch>                        # the base
+git rev-parse origin/<default-branch>                                # the base — record the FULL 40-char SHA (the receipt's `base`; never --short, it can go ambiguous and break `git log <sha>..`)
 git rev-list --left-right --count origin/<default-branch>...HEAD     # how far local lags
 ```
 
@@ -60,6 +60,6 @@ The default sub-agent path needs **no** install/deps — the worktree is enough.
 
 **Issues (vertical slice):** one issue per candidate — *What to build* (the deep module/seam + every call site repointed + tests at the new interface + old copies deleted) / *Acceptance criteria* / *Oracle* (the replayable command + counts **and** the deletion-test verdict) / *Strength* (Strong / Worth-exploring) / *Blocked by*. Tests assert observable behaviour **through** the new interface — a test that has to reach past the interface means the module is the wrong shape. Plus a per-area `PRD.md` (Problem / Candidates / Out of scope).
 
-The area checklist = one `- [ ]` per area (a driver may log progress from it — ralph logs "Remaining tasks: N" at startup — confirming the scoping). Bake the guardrails into the per-iteration spec: analysis-only (writes only under `.scratch/<area>-deepening*/`), no push, **respect your ADRs** (never re-propose a settled decision — flag, don't fork), and **re-verify every candidate against the remote tip**. If you keep a decision record — a `CONTEXT.md` and/or an ADR log, e.g. the ones Matt Pocock's `domain-modeling` skill writes inline — feed it into the exclusion map alongside the existing epics, so the sweep treats those settled decisions as out of scope. No record yet? The guardrail is simply a no-op; the sweep still runs.
+The area checklist = one `- [ ]` per area (a driver may log progress from it — ralph logs "Remaining tasks: N" at startup — confirming the scoping). Bake the guardrails into the per-iteration spec: analysis-only (writes only under `.scratch/<area>-deepening*/`), no push, **respect your ADRs** (never re-propose a settled decision — flag, don't fork), and **re-verify every candidate against the remote tip**. If you keep a decision record — a `CONTEXT.md` and/or an ADR log, e.g. the ones Matt Pocock's `domain-modeling` skill writes inline — feed it into the exclusion map alongside the existing epics, so the sweep treats those settled decisions as out of scope. No record yet? The guardrail is simply a no-op; the sweep still runs. Today the exclusion map is built from epics + CONTEXT/ADRs only; a prior sweep's **rejected seams** join it once the receipt read-path lands (Inc-2, [SWEEP.md](SWEEP.md) §RECEIPT.md) — that's what stops a delta sweep re-proposing and re-killing a seam it already rejected, full-freight, every run.
 
 If your repo already has `.scratch/*-deepening*` epics, use them as the template — they show the proven output shape.
